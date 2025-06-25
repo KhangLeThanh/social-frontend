@@ -21,3 +21,19 @@ export type Post = {
 export type ErrorResponse = {
   message: string;
 };
+
+export type CommentResponse = {
+  id?: number;
+  content: string;
+  userId: number;
+  postId: number;
+};
+
+export type Comment = {
+  id: number;
+  content: string;
+  username: string;
+  createdAt: string;
+  userId: number;
+  postId: number;
+};

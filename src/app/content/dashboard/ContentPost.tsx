@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { io } from "socket.io-client";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { getPosts, getOnePost, updatePost } from "@/app/api/postApi";
@@ -19,7 +20,7 @@ import PostDialog from "./PostDialog";
 
 const socket = io("http://localhost:3000");
 
-export default function ContentPost({ userId }: { userId: number }) {
+export default function ContentPost({ userId }: { userId?: number }) {
   const { data: posts } = useQuery<Post[]>({
     queryKey: ["posts"],
     queryFn: getPosts,
@@ -83,6 +84,12 @@ export default function ContentPost({ userId }: { userId: number }) {
       await updatePostInfo(post);
     }
   };
+
+  const router = useRouter();
+
+  const handleClick = (postId: number) => {
+    router.push(`/content/comment/${postId}`);
+  };
   return (
     <main>
       {posts &&
@@ -142,7 +149,17 @@ export default function ContentPost({ userId }: { userId: number }) {
                     <Button onClick={handleUpdate}>Save</Button>
                   </Box>
                 ) : (
-                  <Typography variant="body1">{post.content}</Typography>
+                  <>
+                    <Typography variant="body1">{post.content}</Typography>
+
+                    <Button
+                      onClick={() => handleClick(post.id)}
+                      variant="contained"
+                      color="primary"
+                    >
+                      View Comments
+                    </Button>
+                  </>
                 )}
               </Box>
             </Box>
