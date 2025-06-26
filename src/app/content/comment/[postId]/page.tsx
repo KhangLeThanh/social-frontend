@@ -112,7 +112,7 @@ export default function CommentPage({ params }: CommentPageProps) {
   };
   return (
     <div>
-      <h2>Comments</h2>
+      <Typography variant="h6">Comments</Typography>
       {comments?.map((comment: Comment) => (
         <Box
           key={comment.id}

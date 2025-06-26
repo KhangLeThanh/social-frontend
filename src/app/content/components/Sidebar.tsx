@@ -15,7 +15,7 @@ import {
 const drawerWidth = 240;
 const navItems = [
   { label: "Dashboard", href: "/content/dashboard" },
-  { label: "User Management", href: "/content/user-management" },
+  { label: "User List", href: "/content/userlist" },
 ];
 export default function Sidebar() {
   const pathname = usePathname();

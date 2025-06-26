@@ -149,18 +149,15 @@ export default function ContentPost({ userId }: { userId?: number }) {
                     <Button onClick={handleUpdate}>Save</Button>
                   </Box>
                 ) : (
-                  <>
-                    <Typography variant="body1">{post.content}</Typography>
-
-                    <Button
-                      onClick={() => handleClick(post.id)}
-                      variant="contained"
-                      color="primary"
-                    >
-                      View Comments
-                    </Button>
-                  </>
+                  <Typography variant="body1">{post.content}</Typography>
                 )}
+                <Button
+                  onClick={() => handleClick(post.id)}
+                  variant="contained"
+                  color="primary"
+                >
+                  View Comments
+                </Button>
               </Box>
             </Box>
           ))}
