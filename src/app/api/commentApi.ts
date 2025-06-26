@@ -45,7 +45,7 @@ export const getComment = async ({ postId }: { postId: number }) => {
   }
 };
 
-export const deleteComment = async ({ commentId }: { commentId: number }) => {
+export const deleteComment = async (commentId: number) => {
   try {
     const response = await axios.delete(`${APIURL}/comments/${commentId}`, {
       withCredentials: true,

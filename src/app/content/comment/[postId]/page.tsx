@@ -3,10 +3,20 @@ import React, { useState, useEffect, use } from "react";
 import { useUser } from "../../layout.content";
 import { io } from "socket.io-client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { TextField, FormControl, Button, Typography, Box } from "@mui/material";
-import { getComment, createComment } from "@/app/api/commentApi";
+import {
+  TextField,
+  FormControl,
+  Button,
+  Typography,
+  Box,
+  IconButton,
+} from "@mui/material";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import { getComment, createComment, updateComment } from "@/app/api/commentApi";
 import { AxiosError } from "axios";
 import { Comment, ErrorResponse, CommentResponse } from "@/ultils/types";
+import CommentDialog from "./CommentDialog";
 
 const socket = io("http://localhost:3000");
 
@@ -19,7 +29,11 @@ export default function CommentPage({ params }: CommentPageProps) {
   const postIdNumber = parseInt(postId, 10);
   const { user } = useUser();
   const [content, setContent] = useState<string>("");
+  const [contentComment, setContentComment] = useState<string>("");
 
+  const [commentId, setCommentId] = useState<number>(0);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const {
     data: comments,
     isLoading,
@@ -32,7 +46,21 @@ export default function CommentPage({ params }: CommentPageProps) {
   const { mutateAsync: createCommentInfo } = useMutation({
     mutationFn: createComment,
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["comments", postIdNumber] });
+      setContent("");
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      console.error(
+        error.response?.data?.message || "Error updating user task"
+      );
+    },
+  });
+  const { mutateAsync: updateCommentInfo } = useMutation({
+    mutationFn: updateComment,
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postIdNumber] });
+      setContentComment("");
+      setIsEdit(false);
     },
     onError: (error: AxiosError<ErrorResponse>) => {
       console.error(
@@ -64,6 +92,24 @@ export default function CommentPage({ params }: CommentPageProps) {
       await createCommentInfo(comment);
     }
   };
+  const handleEdit = (id: number, content: string) => {
+    setIsEdit(true);
+    setCommentId(id);
+    setContentComment(content);
+  };
+  const handleDelete = (id: number) => {
+    setShowDialog(true);
+    setCommentId(id);
+  };
+  const handleUpdate = async () => {
+    if (commentId) {
+      const comment: { commentId: number; content: string } = {
+        content: contentComment,
+        commentId,
+      };
+      await updateCommentInfo(comment);
+    }
+  };
   return (
     <div>
       <h2>Comments</h2>
@@ -80,8 +126,38 @@ export default function CommentPage({ params }: CommentPageProps) {
           }}
         >
           <Typography variant="h6">{comment.username}</Typography>:{" "}
-          <Typography variant="body2"></Typography>
-          {comment.content}
+          {isEdit && comment.id === commentId ? (
+            <Box>
+              <TextField
+                value={contentComment}
+                onChange={(e) => setContentComment(e.target.value)}
+              />
+              <Button
+                onClick={() => {
+                  setIsEdit(false);
+                  setCommentId(0);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleUpdate}>Save</Button>
+            </Box>
+          ) : (
+            <Typography variant="body2"> {comment.content}</Typography>
+          )}
+          {user?.id === comment.userId && (
+            <>
+              <IconButton
+                onClick={() => handleEdit(comment.id, comment.content)}
+              >
+                <EditOutlinedIcon />
+              </IconButton>
+
+              <IconButton onClick={() => handleDelete(comment.id)}>
+                <DeleteOutlineOutlinedIcon />
+              </IconButton>
+            </>
+          )}
         </Box>
       ))}
       <FormControl fullWidth margin="normal">
@@ -95,6 +171,18 @@ export default function CommentPage({ params }: CommentPageProps) {
           Add comment
         </Button>
       </FormControl>
+      <CommentDialog
+        commentId={commentId}
+        isOpen={showDialog}
+        onClose={() => {
+          setShowDialog(false);
+          setCommentId(0);
+        }}
+        onConfirm={() => {
+          setShowDialog(false);
+          setCommentId(0);
+        }}
+      />
     </div>
   );
 }
