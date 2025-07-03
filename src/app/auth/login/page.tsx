@@ -12,6 +12,9 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const handleDirect = () => {
+    router.push("/auth/register");
+  };
   const handleLogin = async () => {
     try {
       const response = await axios.post(
@@ -67,6 +70,7 @@ export default function LoginPage() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+      <Button onClick={handleDirect}>create a new user</Button>
       <Button variant="contained" onClick={handleLogin}>
         Login
       </Button>
