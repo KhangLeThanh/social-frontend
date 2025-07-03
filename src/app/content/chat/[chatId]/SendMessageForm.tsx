@@ -2,23 +2,18 @@
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createMessage } from "@/app/api/messageApi";
-import { Button, FormControl, TextField, Typography } from "@mui/material";
-import { ErrorResponse, Message, MessageResponse } from "@/ultils/types";
+import { Button, FormControl, TextField } from "@mui/material";
+import { ErrorResponse, MessageResponse } from "@/ultils/types";
 import { AxiosError } from "axios";
 import { useUser } from "../../layout.content";
 import { CONNECTINGSOCKET } from "@/app/constant/socket";
 
 type SendMessageProps = {
   chatId: number;
-  initialMessages: Message[];
 };
-export default function ChatPage({
-  chatId,
-  initialMessages,
-}: SendMessageProps) {
+export default function ChatPage({ chatId }: SendMessageProps) {
   const [content, setContent] = useState("");
   const { user } = useUser();
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   const queryClient = useQueryClient();
 
@@ -34,14 +29,9 @@ export default function ChatPage({
       );
     },
   });
-  console.log("test dd", messages);
   useEffect(() => {
-    const handleNewMessage = (payload: Message) => {
+    const handleNewMessage = () => {
       queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
-      if (payload.chatId === chatId) {
-        setMessages((prev) => [...prev, payload]);
-      }
-      console.log("test payload", payload);
     };
 
     CONNECTINGSOCKET.on("message_status", handleNewMessage);
@@ -62,11 +52,6 @@ export default function ChatPage({
   };
   return (
     <>
-      {messages.map((message) => (
-        <Typography key={message.id} variant="body1">
-          {message.username}: {message.content}
-        </Typography>
-      ))}
       <FormControl fullWidth margin="normal">
         <TextField
           value={content}

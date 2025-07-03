@@ -18,7 +18,6 @@ export const getMessage = async ({ chatId }: { chatId: number }) => {
     const response = await axios.get(`${APIURL}/messages/${chatId}`, {
       withCredentials: true,
     });
-    console.log("test res", response);
     return response.data;
   } catch (error: any) {
     console.log("test error", error);
