@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, use } from "react";
 import { useUser } from "../../layout.content";
-import { io } from "socket.io-client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import {
   TextField,
@@ -17,8 +16,7 @@ import { getComment, createComment, updateComment } from "@/app/api/commentApi";
 import { AxiosError } from "axios";
 import { Comment, ErrorResponse, CommentResponse } from "@/ultils/types";
 import CommentDialog from "./CommentDialog";
-
-const socket = io("http://localhost:3000");
+import { CONNECTINGSOCKET } from "@/app/constant/socket";
 
 type CommentPageProps = {
   params: Promise<{ postId: string }>;
@@ -73,10 +71,10 @@ export default function CommentPage({ params }: CommentPageProps) {
       queryClient.invalidateQueries({ queryKey: ["comments", postIdNumber] });
     };
 
-    socket.on("comment_status", handleNewComment);
+    CONNECTINGSOCKET.on("comment_status", handleNewComment);
 
     return () => {
-      socket.off("comment_status", handleNewComment);
+      CONNECTINGSOCKET.off("comment_status", handleNewComment);
     };
   }, [postIdNumber, queryClient]);
 

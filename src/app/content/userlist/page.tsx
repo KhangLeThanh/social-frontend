@@ -1,11 +1,13 @@
 "use client";
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useUser } from "../layout.content";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+import { createChat } from "@/app/api/chatApi";
 import { getUsers } from "@/app/api/userApi";
 import { Typography, Button, Box } from "@mui/material";
-import { UserName } from "@/ultils/types";
+import { UserName, ErrorResponse, ChatResponse } from "@/ultils/types";
 
 export default function UserListPage() {
   const { user } = useUser();
@@ -16,9 +18,26 @@ export default function UserListPage() {
   });
 
   const router = useRouter();
-
-  const handleClick = (userId: number) => {
-    router.push(`/content/chat/${userId}`);
+  const { mutateAsync: createNewChat } = useMutation({
+    mutationFn: createChat,
+    onSuccess: async (data) => {
+      const chatId = data.id;
+      router.push(`/content/chat/${chatId}`);
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      console.error(
+        error.response?.data?.message || "Error updating user task"
+      );
+    },
+  });
+  const handleClick = async (receiverId: number) => {
+    if (user) {
+      const newChat: ChatResponse = {
+        senderId: user.id,
+        receiverId: receiverId,
+      };
+      await createNewChat(newChat);
+    }
   };
   return (
     <>

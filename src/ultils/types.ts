@@ -37,3 +37,21 @@ export type Comment = {
   userId: number;
   postId: number;
 };
+
+export type ChatResponse = {
+  senderId: number;
+  receiverId: number;
+};
+
+export type MessageResponse = {
+  content: string;
+  userId: number;
+  chatId: number;
+};
+
+export type Message = {
+  content: string;
+  username: string;
+  id: number;
+  chatId: number;
+};

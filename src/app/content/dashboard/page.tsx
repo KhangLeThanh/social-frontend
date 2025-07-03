@@ -25,7 +25,6 @@ export default function DashboardPage() {
       );
     },
   });
-  // Handle confirm action (Create or Update)
   const handleConfirm = async () => {
     if (user) {
       const post: PostResponse = {
