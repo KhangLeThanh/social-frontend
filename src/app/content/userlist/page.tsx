@@ -1,69 +1,36 @@
-"use client";
+// app/content/chat/[chatId]/page.tsx
 import React from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useUser } from "../layout.content";
-import { useRouter } from "next/navigation";
-import { AxiosError } from "axios";
-import { createChat } from "@/app/api/chatApi";
-import { getUsers } from "@/app/api/userApi";
-import { Typography, Button, Box } from "@mui/material";
-import { UserName, ErrorResponse, ChatResponse } from "@/ultils/types";
+import { APIURL } from "@/app/constant/baseUrl";
+import { Box, Typography, Grid } from "@mui/material";
+import { fetchWithAuth } from "@/app/lib/api";
+import ChatForm from "./ChatForm";
+import { UserName } from "@/ultils/types";
 
-export default function UserListPage() {
-  const { user } = useUser();
-
-  const { data: users } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => getUsers(),
-  });
-
-  const router = useRouter();
-  const { mutateAsync: createNewChat } = useMutation({
-    mutationFn: createChat,
-    onSuccess: async (data) => {
-      const chatId = data.id;
-      router.push(`/content/chat/${chatId}`);
-    },
-    onError: (error: AxiosError<ErrorResponse>) => {
-      console.error(
-        error.response?.data?.message || "Error updating user task"
-      );
-    },
-  });
-  const handleClick = async (receiverId: number) => {
-    if (user) {
-      const newChat: ChatResponse = {
-        senderId: user.id,
-        receiverId: receiverId,
-      };
-      await createNewChat(newChat);
-    }
+export default async function UserListPage() {
+  const { data: users, error } = (await fetchWithAuth(`${APIURL}/users`)) as {
+    data: UserName[];
+    error: React.ReactNode;
   };
+  if (error) return error;
   return (
     <>
-      <Typography variant="h6">User List</Typography>
-
-      {users?.map((userItem: UserName) => (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-          }}
-          key={userItem.id}
-        >
-          <Typography variant="body2">{userItem.username}</Typography>
-          {user?.id !== userItem.id && (
-            <Button
-              onClick={() => handleClick(userItem.id)}
-              variant="contained"
-              color="primary"
+      <Typography variant="h6">Chat Messages</Typography>
+      <Grid container spacing={2}>
+        {users?.map((userItem: UserName) => (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={userItem.id}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
             >
-              Chat
-            </Button>
-          )}
-        </Box>
-      ))}
+              <Typography variant="body2">{userItem.username}</Typography>
+              <ChatForm userId={userItem.id} />
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
     </>
   );
 }
