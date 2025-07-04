@@ -5,10 +5,13 @@ import { useUser } from "../layout.content";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 import { createChat } from "@/app/api/chatApi";
-import { Button } from "@mui/material";
-import { ErrorResponse, ChatResponse } from "@/ultils/types";
+import { Box, Button, Grid, Typography } from "@mui/material";
+import { ErrorResponse, ChatResponse, UserName } from "@/ultils/types";
 
-export default function ChatFormPage({ userId }: { userId: number }) {
+type UserChatProps = {
+  initialUsers: UserName[];
+};
+export default function UserChatPage({ initialUsers }: UserChatProps) {
   const { user } = useUser();
 
   const router = useRouter();
@@ -35,15 +38,28 @@ export default function ChatFormPage({ userId }: { userId: number }) {
   };
   return (
     <>
-      {user?.id !== userId && (
-        <Button
-          onClick={() => handleClick(userId)}
-          variant="contained"
-          color="primary"
-        >
-          Chat
-        </Button>
-      )}
+      {initialUsers
+        ?.filter((userItem: UserName) => userItem.id !== user?.id)
+        .map((userItem: UserName) => (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={userItem.id}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <Typography variant="body2">{userItem.username}</Typography>
+              <Button
+                onClick={() => handleClick(userItem.id)}
+                variant="contained"
+                color="primary"
+              >
+                Chat
+              </Button>
+            </Box>
+          </Grid>
+        ))}
     </>
   );
 }
