@@ -17,10 +17,10 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ErrorResponse, ChatResponse, UserName } from "@/ultils/types";
 import { MenuPositions } from "@/ultils/enum";
 
-type UserChatProps = {
+type UserMenuProps = {
   initialUsers: UserName[];
 };
-export default function UserChatPage({ initialUsers }: UserChatProps) {
+export default function UserMenuPage({ initialUsers }: UserMenuProps) {
   const { user } = useUser();
   const [anchorEl, setAnchorEl] = useState<null | any>(null);
   const [userId, setUserId] = useState<number>(0);

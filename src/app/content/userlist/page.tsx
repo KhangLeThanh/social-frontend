@@ -3,7 +3,7 @@ import React from "react";
 import { APIURL } from "@/app/constant/baseUrl";
 import { Typography, Grid } from "@mui/material";
 import { fetchWithAuth } from "@/app/lib/api";
-import UserChat from "./UserChat";
+import UserMenu from "./UserMenu";
 import { UserName } from "@/ultils/types";
 
 export default async function UserListPage() {
@@ -17,7 +17,7 @@ export default async function UserListPage() {
     <>
       <Typography variant="h6">User List</Typography>
       <Grid container spacing={2}>
-        <UserChat initialUsers={users} />
+        <UserMenu initialUsers={users} />
       </Grid>
     </>
   );
