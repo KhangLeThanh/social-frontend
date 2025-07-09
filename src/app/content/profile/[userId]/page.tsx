@@ -15,7 +15,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const { userId } = use(params);
   const userIdNumber = parseInt(userId, 10);
   const { data: posts } = useQuery<Post[]>({
-    queryKey: ["posts"],
+    queryKey: ["posts", userIdNumber],
     queryFn: () => getPersonalPost(userIdNumber),
     enabled: !!userIdNumber,
   });
