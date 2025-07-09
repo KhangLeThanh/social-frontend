@@ -15,12 +15,17 @@ import {
   Typography,
   Avatar,
   IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
 import Sidebar from "@/app/content/components/Sidebar";
 import axios from "axios";
 import { APIURL } from "@/app/constant/baseUrl";
 import { UserName } from "@/ultils/types";
+import { MenuPositions } from "@/ultils/enum";
 
 const UserContext = createContext<{
   user: UserName | null;
@@ -36,6 +41,8 @@ export function useUser() {
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserName | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | any>(null);
+
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -57,7 +64,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     };
     fetchUser();
   }, []);
-
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const handleLogOut = async () => {
     try {
       await axios.post(`${APIURL}/logout`, null, { withCredentials: true });
@@ -67,6 +80,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setError(error.response?.data?.error || "Logout failed");
     }
   };
+  const handleProfile = () => {
+    if (user) {
+      router.push(`/content/profile/${user.id}`);
+    }
+  };
+  const open = Boolean(anchorEl);
 
   return (
     <UserContext.Provider value={{ user, errorUser: error }}>
@@ -81,13 +100,49 @@ export function UserProvider({ children }: { children: ReactNode }) {
               <Typography variant="h6">MyLogo</Typography>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Avatar alt={user?.username || ""} src="/avatar.jpg" />
-                <IconButton onClick={handleLogOut}>
+                <IconButton onClick={(event) => handleOpen(event)}>
                   <ArrowDropDownIcon />
                 </IconButton>
               </Box>
             </Toolbar>
           </AppBar>
-
+          <Menu
+            anchorEl={anchorEl}
+            id="action-menu"
+            open={open}
+            onClose={handleClose}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleClose();
+            }}
+            transformOrigin={{
+              horizontal: MenuPositions.RIGHT,
+              vertical: MenuPositions.TOP,
+            }}
+            anchorOrigin={{
+              horizontal: MenuPositions.RIGHT,
+              vertical: MenuPositions.BOTTOM,
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                handleProfile();
+              }}
+            >
+              <PersonIcon />
+              My Profile
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleLogOut();
+                setAnchorEl(null);
+              }}
+            >
+              <LogoutIcon />
+              LogOut
+            </MenuItem>
+          </Menu>
           <Box sx={{ p: 3, flexGrow: 1, overflowY: "auto" }}>{children}</Box>
         </Box>
       </Box>

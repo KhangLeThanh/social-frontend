@@ -63,3 +63,18 @@ export const deletePost = async (postId: number) => {
     console.log("test error", error);
   }
 };
+
+export const getPersonalPost = async (userId: number) => {
+  try {
+    const response = await axios.get(
+      `${APIURL}/posts/personal?userId=${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    console.log("test response", response);
+    return response.data;
+  } catch (error: any) {
+    console.log("test error", error);
+  }
+};

@@ -30,6 +30,7 @@ export default function DashboardPage() {
       const post: PostResponse = {
         content,
         userId: user.id,
+        postUserId: user.id,
       };
       await createPostInfo(post);
     }

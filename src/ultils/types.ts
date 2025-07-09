@@ -8,6 +8,7 @@ export type PostResponse = {
   id?: number;
   content: string;
   userId: number;
+  postUserId: number | null;
 };
 
 export type Post = {
