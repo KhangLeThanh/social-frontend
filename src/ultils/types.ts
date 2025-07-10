@@ -18,7 +18,11 @@ export type Post = {
   createdAt: string;
   userId: number;
 };
-
+export type PostProfile = Post & {
+  authorUsername: string;
+  receiverUsername: string;
+  postUserId: number;
+};
 export type ErrorResponse = {
   message: string;
 };
