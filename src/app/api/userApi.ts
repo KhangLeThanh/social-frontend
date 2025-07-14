@@ -17,7 +17,7 @@ export const getUser = async ({ userId }: { userId: number }) => {
     const response = await axios.get(`${APIURL}/users/${userId}`, {
       withCredentials: true,
     });
-    return response.data;
+    return response.data[0];
   } catch (error: any) {
     console.log("test error", error);
   }

@@ -1,3 +1,5 @@
+import { StatusFriendRequest } from "./enum";
+
 export type UserName = {
   username: string;
   password: string;
@@ -59,4 +61,7 @@ export type Message = {
   username: string;
   id: number;
   chatId: number;
+};
+export type FriendRequestResponse = ChatResponse & {
+  status: StatusFriendRequest;
 };

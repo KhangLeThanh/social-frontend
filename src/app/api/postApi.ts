@@ -72,7 +72,20 @@ export const getPersonalPost = async (userId: number) => {
         withCredentials: true,
       }
     );
-    console.log("test response", response);
+    return response.data;
+  } catch (error: any) {
+    console.log("test error", error);
+  }
+};
+
+export const getProfilePost = async (userId: number) => {
+  try {
+    const response = await axios.get(
+      `${APIURL}/posts/profile?userId=${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error: any) {
     console.log("test error", error);

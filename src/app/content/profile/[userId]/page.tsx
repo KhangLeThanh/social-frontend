@@ -1,11 +1,20 @@
 "use client";
 import React, { use } from "react";
 import { useUser } from "../../layout.content";
-import { useQuery } from "@tanstack/react-query";
-import { getPersonalPost } from "@/app/api/postApi";
-import { Avatar, Box, Typography } from "@mui/material";
-import { PostProfile } from "@/ultils/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPersonalPost, getProfilePost } from "@/app/api/postApi";
+import { getUser } from "@/app/api/userApi";
+import { sendRequest } from "@/app/api/friendApi";
+import { Avatar, Box, Button, Typography } from "@mui/material";
+import {
+  ErrorResponse,
+  PostProfile,
+  UserName,
+  FriendRequestResponse,
+} from "@/ultils/types";
+import { AxiosError } from "axios";
 import PostForm from "@/app/content/sharedcomponents/PostForm";
+import { StatusFriendRequest } from "@/ultils/enum";
 
 type ProfilePageProps = {
   params: Promise<{ userId: string }>;
@@ -15,23 +24,67 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
   const { userId } = use(params);
   const userIdNumber = parseInt(userId, 10);
+  const shouldFetch = !!user && !!userIdNumber;
+  const queryClient = useQueryClient();
+
   const { data: posts } = useQuery<PostProfile[]>({
     queryKey: ["posts", userIdNumber],
-    queryFn: () => getPersonalPost(userIdNumber),
+    queryFn: () => {
+      return userIdNumber === user?.id
+        ? getProfilePost(userIdNumber)
+        : getPersonalPost(userIdNumber);
+    },
+    enabled: shouldFetch,
+  });
+  const { data: userProfile } = useQuery<UserName>({
+    queryKey: ["user", userIdNumber],
+    queryFn: () => {
+      return getUser({ userId: userIdNumber });
+    },
     enabled: !!userIdNumber,
   });
-
+  const { mutateAsync: sendFriendRequest } = useMutation({
+    mutationFn: sendRequest,
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      console.error(
+        error.response?.data?.message || "Error sending user request"
+      );
+    },
+  });
+  const handleRequest = async () => {
+    if (user) {
+      const friendRequest: FriendRequestResponse = {
+        status: StatusFriendRequest.Pending,
+        senderId: user.id,
+        receiverId: userIdNumber,
+      };
+      await sendFriendRequest(friendRequest);
+    }
+  };
+  console.log("test userProfile", userProfile);
   return (
     <main>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        {user && (
-          <PostForm
-            userId={user.id}
-            authorName={user?.username}
-            postUserId={userIdNumber}
-          />
-        )}
-      </Box>
+      {userProfile && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="h5">{userProfile.username}</Typography>
+          {userIdNumber !== user?.id && (
+            <Button variant="contained" onClick={handleRequest}>
+              Add Friend
+            </Button>
+          )}
+        </Box>
+      )}
+
+      {user && (
+        <PostForm
+          userId={user.id}
+          authorName={user?.username}
+          postUserId={userIdNumber}
+        />
+      )}
       {posts &&
         posts.map((post) => (
           <Box

@@ -5,3 +5,9 @@ export enum MenuPositions {
   RIGHT = "right",
   CENTER = "center",
 }
+
+export enum StatusFriendRequest {
+  Accepted = "accepted",
+  Pending = "pending",
+  Rejected = "rejected",
+}
