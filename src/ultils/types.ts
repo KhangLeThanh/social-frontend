@@ -62,6 +62,19 @@ export type Message = {
   id: number;
   chatId: number;
 };
+
 export type FriendRequestResponse = ChatResponse & {
   status: StatusFriendRequest;
+};
+
+export type AcceptFriendRequestResponse = {
+  requestId: number;
+  status: StatusFriendRequest;
+};
+
+export type FriendShip = {
+  id: number;
+  status: StatusFriendRequest;
+  requester_id: number;
+  sender_id: number;
 };

@@ -1,4 +1,4 @@
-// app/content/chat/[chatId]/page.tsx
+// app/content/userlist/page.tsx
 import React from "react";
 import { APIURL } from "@/app/constant/baseUrl";
 import { Typography, Grid } from "@mui/material";

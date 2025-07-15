@@ -1,20 +1,14 @@
 "use client";
-import React, { use } from "react";
+import React, { useEffect, use, useState } from "react";
 import { useUser } from "../../layout.content";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getPersonalPost, getProfilePost } from "@/app/api/postApi";
 import { getUser } from "@/app/api/userApi";
-import { sendRequest } from "@/app/api/friendApi";
+import { getFriendShip } from "@/app/api/friendApi";
 import { Avatar, Box, Button, Typography } from "@mui/material";
-import {
-  ErrorResponse,
-  PostProfile,
-  UserName,
-  FriendRequestResponse,
-} from "@/ultils/types";
-import { AxiosError } from "axios";
+import { PostProfile, UserName, FriendShip } from "@/ultils/types";
 import PostForm from "@/app/content/sharedcomponents/PostForm";
-import { StatusFriendRequest } from "@/ultils/enum";
+import FriendRequestAction from "./FriendRequestAction";
 
 type ProfilePageProps = {
   params: Promise<{ userId: string }>;
@@ -25,7 +19,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const { userId } = use(params);
   const userIdNumber = parseInt(userId, 10);
   const shouldFetch = !!user && !!userIdNumber;
-  const queryClient = useQueryClient();
+  const [checkedFriendship, setCheckedFriendship] = useState<boolean>(false);
 
   const { data: posts } = useQuery<PostProfile[]>({
     queryKey: ["posts", userIdNumber],
@@ -43,37 +37,45 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     },
     enabled: !!userIdNumber,
   });
-  const { mutateAsync: sendFriendRequest } = useMutation({
-    mutationFn: sendRequest,
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["friends"] });
+
+  const { data: userFriendShip } = useQuery<FriendShip[]>({
+    queryKey: ["userFriendShip", userIdNumber],
+    queryFn: () => {
+      if (!user?.id || !userIdNumber)
+        return Promise.reject("Missing user info");
+
+      return getFriendShip({
+        userId: user.id,
+        profileId: userIdNumber,
+      });
     },
-    onError: (error: AxiosError<ErrorResponse>) => {
-      console.error(
-        error.response?.data?.message || "Error sending user request"
-      );
-    },
+    enabled: !!userIdNumber,
   });
-  const handleRequest = async () => {
-    if (user) {
-      const friendRequest: FriendRequestResponse = {
-        status: StatusFriendRequest.Pending,
-        senderId: user.id,
-        receiverId: userIdNumber,
-      };
-      await sendFriendRequest(friendRequest);
+  useEffect(() => {
+    if (userFriendShip && userFriendShip.length) {
+      setCheckedFriendship(true);
+    } else {
+      setCheckedFriendship(false);
     }
-  };
-  console.log("test userProfile", userProfile);
+  }, [userFriendShip]);
+
+  console.log("test userFriendShip", userFriendShip);
+  if (!user || !userFriendShip) {
+    return <div>Loading...</div>;
+  }
   return (
     <main>
       {userProfile && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="h5">{userProfile.username}</Typography>
           {userIdNumber !== user?.id && (
-            <Button variant="contained" onClick={handleRequest}>
-              Add Friend
-            </Button>
+            <FriendRequestAction
+              checkedFriend={checkedFriendship}
+              userId={user?.id ?? null}
+              profileId={userIdNumber}
+              status={userFriendShip?.[0]?.status ?? "unknown"}
+              requestId={userFriendShip?.[0]?.id ?? null}
+            />
           )}
         </Box>
       )}

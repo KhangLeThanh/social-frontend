@@ -12,3 +12,56 @@ export const sendRequest = async (newRequest: FriendRequestResponse) => {
     console.log("test error", error);
   }
 };
+
+export const acceptRequest = async ({
+  requestId,
+  status,
+}: {
+  requestId: number;
+  status: FriendRequestResponse;
+}) => {
+  try {
+    const response = await axios.patch(
+      `${APIURL}/friend-request/${requestId}`,
+      { status },
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.log("test error", error);
+  }
+};
+export const cancelRequest = async (requestId: number) => {
+  try {
+    const response = await axios.delete(
+      `${APIURL}/friend-request/${requestId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.log("test error", error);
+  }
+};
+export const getFriendShip = async ({
+  userId,
+  profileId,
+}: {
+  userId: number;
+  profileId: number;
+}) => {
+  try {
+    const response = await axios.get(
+      `${APIURL}/friend-request/friend-ship/${userId}/${profileId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.log("test error", error);
+  }
+};
