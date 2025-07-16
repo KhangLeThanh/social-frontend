@@ -19,6 +19,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import Sidebar from "@/app/content/components/Sidebar";
@@ -26,6 +27,7 @@ import axios from "axios";
 import { APIURL } from "@/app/constant/baseUrl";
 import { UserName } from "@/ultils/types";
 import { MenuPositions } from "@/ultils/enum";
+import SearchFriend from "./sharedcomponents/SearchFriend";
 
 const UserContext = createContext<{
   user: UserName | null;
@@ -85,6 +87,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
       router.push(`/content/profile/${user.id}`);
     }
   };
+  const handleFriend = () => {
+    if (user) {
+      router.push(`/content/friend/${user.id}`);
+    }
+  };
   const open = Boolean(anchorEl);
 
   return (
@@ -96,8 +103,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
             position="static"
             sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
           >
-            <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography variant="h6">MyLogo</Typography>
+            <Toolbar
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                pt: 2,
+                pb: 2,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Typography variant="h6">MyLogo</Typography>
+                <SearchFriend />
+              </Box>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Avatar alt={user?.username || ""} src="/avatar.jpg" />
                 <IconButton onClick={(event) => handleOpen(event)}>
@@ -132,6 +149,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
             >
               <PersonIcon />
               My Profile
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                handleFriend();
+              }}
+            >
+              <PeopleAltOutlinedIcon />
+              My Friends
             </MenuItem>
             <MenuItem
               onClick={() => {

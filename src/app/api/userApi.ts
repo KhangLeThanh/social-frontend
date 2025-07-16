@@ -22,3 +22,17 @@ export const getUser = async ({ userId }: { userId: number }) => {
     console.log("test error", error);
   }
 };
+
+export const searchUser = async ({ userName }: { userName: string }) => {
+  try {
+    const response = await axios.get(
+      `${APIURL}/users/search?userName=${userName}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data ?? [];
+  } catch (error: any) {
+    console.log("test error", error);
+  }
+};

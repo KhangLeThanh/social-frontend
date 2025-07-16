@@ -65,3 +65,14 @@ export const getFriendShip = async ({
     console.log("test error", error);
   }
 };
+
+export const getAcceptedFriend = async (userId: number) => {
+  try {
+    const response = await axios.get(`${APIURL}/friend-request/${userId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.log("test error", error);
+  }
+};

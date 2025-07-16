@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getPersonalPost, getProfilePost } from "@/app/api/postApi";
 import { getUser } from "@/app/api/userApi";
 import { getFriendShip } from "@/app/api/friendApi";
-import { Avatar, Box, Button, Typography } from "@mui/material";
+import { Avatar, Box, Typography } from "@mui/material";
 import { PostProfile, UserName, FriendShip } from "@/ultils/types";
 import PostForm from "@/app/content/sharedcomponents/PostForm";
 import FriendRequestAction from "./FriendRequestAction";
@@ -59,7 +59,6 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }
   }, [userFriendShip]);
 
-  console.log("test userFriendShip", userFriendShip);
   if (!user || !userFriendShip) {
     return <div>Loading...</div>;
   }
