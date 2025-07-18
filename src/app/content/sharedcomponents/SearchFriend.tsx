@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import { UserName } from "@/ultils/types";
 import { searchUser } from "@/app/api/userApi";
 import { useQuery } from "@tanstack/react-query";
@@ -45,7 +45,7 @@ export default function SearchFriend() {
         }}
       />
 
-      {textInput.trim().length > 0 && (
+      {debouncedInput.length > 0 && (
         <Box
           sx={{
             position: "absolute",
@@ -70,22 +70,31 @@ export default function SearchFriend() {
               </Typography>
             </Box>
           ) : userList && userList.length > 0 ? (
-            userList.map((user) => (
-              <Box
-                key={user.id}
-                sx={{
-                  borderBottom: "1px solid #eee",
-                  px: 2,
-                  py: 1,
-                  cursor: "pointer",
-                  "&:hover": { backgroundColor: "#f5f5f5" },
-                }}
-              >
-                <Typography variant="body2" sx={{ color: "#444" }}>
-                  {user.username}
-                </Typography>
-              </Box>
-            ))
+            <>
+              {userList.slice(0, 4).map((user) => (
+                <Box
+                  key={user.id}
+                  sx={{
+                    borderBottom: "1px solid #eee",
+                    px: 2,
+                    py: 1,
+                    cursor: "pointer",
+                    "&:hover": { backgroundColor: "#f5f5f5" },
+                  }}
+                >
+                  <Typography variant="body2" sx={{ color: "#444" }}>
+                    {user.username}
+                  </Typography>
+                </Box>
+              ))}
+              {userList.length > 4 && (
+                <Button
+                  sx={{ fontSize: "0.8rem", px: 2, py: 1, width: "100%" }}
+                >
+                  View all results
+                </Button>
+              )}
+            </>
           ) : (
             <Box sx={{ p: 1 }}>
               <Typography variant="body2" sx={{ color: "#444" }}>
