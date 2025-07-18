@@ -3,20 +3,21 @@ import { Box, TextField, Typography } from "@mui/material";
 import { UserName } from "@/ultils/types";
 import { searchUser } from "@/app/api/userApi";
 import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "use-debounce";
 
 export default function SearchFriend() {
   const [textInput, setTextInput] = useState<string>("");
+  const [debouncedInput] = useDebounce(textInput, 300);
 
   const {
     data: userList,
     isLoading,
     isError,
   } = useQuery<UserName[]>({
-    queryKey: ["users", textInput],
-    queryFn: () => searchUser({ userName: textInput }),
-    enabled: textInput.trim().length > 0,
+    queryKey: ["users", debouncedInput],
+    queryFn: () => searchUser({ userName: debouncedInput }),
+    enabled: debouncedInput.length > 0,
   });
-
   return (
     <Box sx={{ pl: 4, position: "relative" }}>
       <TextField

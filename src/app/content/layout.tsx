@@ -10,7 +10,6 @@ export default async function ContentLayout({
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token");
-
   if (!token) {
     redirect("/auth/login");
   }

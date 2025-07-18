@@ -4,27 +4,40 @@ import { useState } from "react";
 import axios from "axios";
 import { APIURL } from "@/app/constant/baseUrl";
 import { TextField, Button, Typography, Box } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleRegister = async () => {
     try {
-      const response = await axios.post(
+      await axios.post(
         `${APIURL}/users`,
         {
           userName,
           password,
         },
         {
-          withCredentials: true, // this is important if cookies are involved
+          withCredentials: true,
         }
       );
 
-      const { user } = response.data;
+      const loginResponse = await axios.post(
+        `${APIURL}/login`,
+        {
+          userName,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      const user = loginResponse.data;
       localStorage.setItem("userId", user.id);
+      router.push("/content/dashboard");
     } catch (error: any) {
       if (error.response?.data?.error) {
         setError(error.response.data.error);
