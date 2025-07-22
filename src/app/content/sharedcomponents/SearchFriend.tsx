@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Link from "next/link";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { UserName } from "@/ultils/types";
 import { searchUser } from "@/app/api/userApi";
@@ -88,11 +89,16 @@ export default function SearchFriend() {
                 </Box>
               ))}
               {userList.length > 4 && (
-                <Button
-                  sx={{ fontSize: "0.8rem", px: 2, py: 1, width: "100%" }}
+                <Link
+                  href={`/content/userresult?search=${debouncedInput}`}
+                  passHref
                 >
-                  View all results
-                </Button>
+                  <Button
+                    sx={{ fontSize: "0.8rem", px: 2, py: 1, width: "100%" }}
+                  >
+                    View all results
+                  </Button>
+                </Link>
               )}
             </>
           ) : (

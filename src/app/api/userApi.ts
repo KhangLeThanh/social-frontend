@@ -1,11 +1,20 @@
 import axios from "axios";
 import { APIURL } from "@/app/constant/baseUrl";
 
-export const getUsers = async () => {
+export const getUsers = async ({
+  limit,
+  offset,
+}: {
+  limit: number;
+  offset: number;
+}) => {
   try {
-    const response = await axios.get(`${APIURL}/users`, {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      `${APIURL}/users/?limit=${limit}&offset=${offset}`,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error: any) {
     console.log("test error", error);
@@ -23,10 +32,18 @@ export const getUser = async ({ userId }: { userId: number }) => {
   }
 };
 
-export const searchUser = async ({ userName }: { userName: string }) => {
+export const searchUser = async ({
+  userName,
+  limit,
+  offset,
+}: {
+  userName: string;
+  limit?: number;
+  offset?: number;
+}) => {
   try {
     const response = await axios.get(
-      `${APIURL}/users/search?userName=${userName}`,
+      `${APIURL}/users/search?userName=${userName}&limit=${limit}&offset=${offset}`,
       {
         withCredentials: true,
       }
