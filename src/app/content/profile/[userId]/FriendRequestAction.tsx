@@ -87,7 +87,6 @@ export default function FriendRequestAction({
       requestId,
       status,
     };
-    console.log("test status", status);
     if (status === StatusFriendRequest.Pending) {
       await sendFriendRequest(friendRequest);
     } else if (status === StatusFriendRequest.Accepted) {

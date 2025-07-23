@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { UserName } from "@/ultils/types";
@@ -9,6 +9,7 @@ import { useDebounce } from "use-debounce";
 export default function SearchFriend() {
   const [textInput, setTextInput] = useState<string>("");
   const [debouncedInput] = useDebounce(textInput, 300);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const {
     data: userList,
@@ -19,8 +20,22 @@ export default function SearchFriend() {
     queryFn: () => searchUser({ userName: debouncedInput }),
     enabled: debouncedInput.length > 0,
   });
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setTextInput("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  console.log("test debouncedInput", debouncedInput);
   return (
-    <Box sx={{ pl: 4, position: "relative" }}>
+    <Box ref={containerRef} sx={{ pl: 4, position: "relative" }}>
       <TextField
         placeholder="Search..."
         fullWidth

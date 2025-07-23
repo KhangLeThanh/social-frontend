@@ -1,6 +1,7 @@
 import axios from "axios";
 import { APIURL } from "@/app/constant/baseUrl";
 import { FriendRequestResponse } from "@/ultils/types";
+import { StatusFriendRequest } from "@/ultils/enum";
 
 export const sendRequest = async (newRequest: FriendRequestResponse) => {
   try {
@@ -18,7 +19,7 @@ export const acceptRequest = async ({
   status,
 }: {
   requestId: number;
-  status: FriendRequestResponse;
+  status: StatusFriendRequest;
 }) => {
   try {
     const response = await axios.patch(

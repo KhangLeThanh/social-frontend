@@ -1,44 +1,74 @@
 "use client";
-import React, { useCallback, useEffect } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import React, { useEffect, useRef } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { Box, Typography } from "@mui/material";
+import { Box, Grid, Typography, CircularProgress } from "@mui/material";
 import { searchUser } from "@/app/api/userApi";
 import { UserName } from "@/ultils/types";
 
-export default function ProfilePage() {
+export default function UserResultPage() {
   const searchParams = useSearchParams();
-  const userName = searchParams.get("search") || ""; // get search from query string
+  const queryClient = useQueryClient();
+
+  const [userName, setUserName] = React.useState("");
+
   const LIMIT = 10;
+  useEffect(() => {
+    const name = searchParams.get("search") || "";
+    setUserName(name);
+
+    // Remove cached query so React Query can reload fresh
+    queryClient.removeQueries({ queryKey: ["users", name] });
+  }, [searchParams, queryClient]);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery<UserName[]>({
       queryKey: ["users", userName],
-      queryFn: ({ pageParam = 0 }) =>
-        searchUser({ userName, limit: LIMIT, offset: pageParam }),
+      queryFn: async ({ pageParam = 0 }) => {
+        const result = await searchUser({
+          userName,
+          limit: LIMIT,
+          offset: pageParam,
+        });
+        return result ?? [];
+      },
       getNextPageParam: (lastPage, allPages) => {
-        if (lastPage.length < LIMIT) return undefined;
+        if (!lastPage || lastPage.length < LIMIT) return undefined;
         return allPages.length * LIMIT;
       },
-      enabled: userName.length > 0,
+      enabled: !!userName,
       initialPageParam: 0,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      staleTime: 0,
     });
 
-  // Scroll handling: load more when near bottom
-  const handleScroll = useCallback(() => {
-    if (
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 300 &&
-      hasNextPage &&
-      !isFetchingNextPage
-    ) {
-      fetchNextPage();
-    }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  console.log("test data", data);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+    if (!hasNextPage || isFetchingNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+
+    const current = loadMoreRef.current;
+    if (current) {
+      observer.observe(current);
+    }
+
+    observerRef.current = observer;
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <Box sx={{ p: 2 }}>
@@ -52,29 +82,46 @@ export default function ProfilePage() {
         <Typography color="error">Error loading users.</Typography>
       )}
 
-      {data?.pages.map((page, i) => (
-        <React.Fragment key={i}>
-          {page.map((user) => (
-            <Box
-              key={user.id}
-              sx={{
-                borderBottom: "1px solid #ccc",
-                py: 1,
-              }}
-            >
-              <Typography>{user.username}</Typography>
-            </Box>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          paddingBottom: 8,
+        }}
+      >
+        <Grid container spacing={2}>
+          {data?.pages.flat().map((userItem: UserName) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={userItem.id}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Typography variant="body2">{userItem.username}</Typography>
+              </Box>
+            </Grid>
           ))}
-        </React.Fragment>
-      ))}
+        </Grid>
 
-      {isFetchingNextPage && <Typography>Loading more...</Typography>}
+        <Box
+          ref={loadMoreRef}
+          sx={{
+            height: 50,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {isFetchingNextPage && <CircularProgress size={24} />}
+        </Box>
 
-      {!hasNextPage && data && data.pages.flat().length > 0 && (
-        <Typography sx={{ mt: 2, textAlign: "center" }}>
-          No more users
-        </Typography>
-      )}
+        {!hasNextPage && (
+          <Typography sx={{ mt: 2, textAlign: "center" }}>
+            No more users to load.
+          </Typography>
+        )}
+      </Box>
     </Box>
   );
 }
