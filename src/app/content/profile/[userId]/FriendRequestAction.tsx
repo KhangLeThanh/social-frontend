@@ -102,7 +102,6 @@ export default function FriendRequestAction({
   const handleClose = () => {
     setAnchorEl(null);
   };
-  console.log("test requestId", requestId);
   return checkedFriend ? (
     <>
       <Button
